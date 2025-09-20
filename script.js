@@ -102,26 +102,60 @@ if (form) {
   const estado = document.getElementById("estado");
   const btn = document.getElementById("btn-enviar");
 
-  // URL de PRODUCCIÓN de tu Webhook (con el workflow activado en n8n)
   const WEBHOOK_URL = "https://agencia-ia-n8n.u2vajm.easypanel.host/webhook/1d8a6255-14db-4314-874d-4e72759be8e2";
 
   form.addEventListener("submit", async (e) => {
-    e.preventDefault(); // Previene que la página se recargue
+    e.preventDefault();
 
-    if (form.website?.value) return; // honeypot
+    if (form.website?.value) return; // Honeypot
 
-    if (!document.getElementById("privacidad")?.checked) {
-      mostrar("Debes aceptar la política de privacidad.");
+    // --- BLOQUE DE VALIDACIÓN ACTUALIZADO ---
+    const nombre = form.nombre?.value.trim();
+    const email = form.email?.value.trim();
+    const asunto = form.asunto?.value;
+    const telefono = form.telefono?.value.trim();
+    const mensaje = form.mensaje?.value.trim();
+    const privacidad = document.getElementById("privacidad")?.checked;
+
+    // 1. Validar que los campos no estén vacíos
+    if (!nombre || !email || !asunto || !telefono || !mensaje) {
+      mostrar("Por favor, completa todos los campos obligatorios.");
       return;
     }
 
-    const tel = (form.telefono?.value || "").replace(/[^\d+]/g, "");
+    // 2. Validar formato de email
+    const emailRegex = /^\S+@\S+\.\S+$/;
+    if (!emailRegex.test(email)) {
+      mostrar("Por favor, introduce una dirección de email válida.");
+      return;
+    }
+
+    // 3. Validar formato de teléfono internacional
+    const telefonoRegex = /^\+\d{1,4}\d{6,}$/;
+    if (!telefonoRegex.test(telefono)) {
+      mostrar("El teléfono debe incluir el signo + seguido del código de país y el número.");
+      return;
+    }
+
+    // 4. Validar longitud del mensaje
+    if (mensaje.length < 20) {
+      mostrar("El mensaje debe contener al menos 20 caracteres.");
+      return;
+    }
+    
+    // 5. Validar política de privacidad
+    if (!privacidad) {
+      mostrar("Debes aceptar la política de privacidad.");
+      return;
+    }
+    // --- FIN DEL BLOQUE DE VALIDACIÓN ---
+
     const payload = {
-      nombre:  form.nombre?.value.trim()  || "",
-      email:   form.email?.value.trim()   || "",
-      asunto:  form.asunto?.value         || "",
-      telefono: tel,
-      mensaje: form.mensaje?.value.trim() || "",
+      nombre:  nombre,
+      email:   email,
+      asunto:  asunto,
+      telefono: telefono.replace(/[^\d+]/g, ""), // Limpia el teléfono por si acaso
+      mensaje: mensaje,
       fuente:  "landing-agencia"
     };
 
