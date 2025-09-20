@@ -1,0 +1,8 @@
+{
+  "particleCount": 110,
+  "size": { "min": 1.0, "max": 2.6 },
+  "speed": { "min": 0.12, "max": 0.40 },
+  "color": "rgba(122,255,138,0.9)",
+  "connect": true,
+  "connectDistance": 120
+}
